@@ -1,0 +1,112 @@
+<%- include('partials/header') %>
+
+<div class="jumbotron bg-light p-5 rounded-3 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="display-4 fw-bold">Find Your Dream Job</h1>
+                <p class="lead">Browse thousands of job listings or post jobs for free. Connect with top talent and employers.</p>
+                <div class="mt-4">
+                    <form action="/jobs" method="GET" class="row g-3">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-lg" name="search" placeholder="Job title, keywords, or company">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Search Jobs</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-5 d-none d-md-block">
+                <img src="https://placehold.co/600x400/007bff/FFFFFF?text=Job+Portal" alt="Job Search" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Why Choose Our Job Portal?</h2>
+            <p class="lead">The easiest way to find jobs and hire great candidates</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-search text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4>Easy Job Search</h4>
+                    <p>Find relevant jobs matching your skills and experience in just a few clicks.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-building text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4>Top Employers</h4>
+                    <p>Connect with leading companies and organizations across various industries.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-badge text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4>Verified Profiles</h4>
+                    <p>Create a professional profile to showcase your skills and experience to employers.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>For Job Seekers & Employers</h2>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h3><i class="bi bi-person-fill me-2 text-primary"></i> Job Seekers</h3>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Create a professional profile</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Browse and apply to jobs</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Track your applications</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Get notified about new opportunities</li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="/register" class="btn btn-outline-primary">Register as Job Seeker</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h3><i class="bi bi-building-fill me-2 text-primary"></i> Employers</h3>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Create a company profile</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Post unlimited job listings</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Review and manage applications</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Connect with qualified candidates</li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="/register-company" class="btn btn-outline-primary">Register as Employer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

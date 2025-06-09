@@ -1,0 +1,222 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Admin Dashboard</h2>
+        <p class="text-muted">Welcome to the admin dashboard. Manage users, jobs, and platform statistics.</p>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <div class="display-4 text-primary mb-2"><%= counts.job_seekers_count %></div>
+                <h5 class="card-title">Job Seekers</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <div class="display-4 text-primary mb-2"><%= counts.employers_count %></div>
+                <h5 class="card-title">Employers</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <div class="display-4 text-primary mb-2"><%= counts.jobs_count %></div>
+                <h5 class="card-title">Jobs Posted</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <div class="display-4 text-primary mb-2"><%= counts.applications_count %></div>
+                <h5 class="card-title">Applications</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Recent Users</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name/Company</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Registered</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (users.length === 0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center py-3">No users found</td>
+                                </tr>
+                            <% } else { %>
+                                <% users.forEach(user => { %>
+                                    <tr>
+                                        <td><%= user.user_id %></td>
+                                        <td><%= user.name %></td>
+                                        <td><%= user.email %></td>
+                                        <td>
+                                            <% if (user.user_type === 'job_seeker') { %>
+                                                <span class="badge bg-info">Job Seeker</span>
+                                            <% } else if (user.user_type === 'employer') { %>
+                                                <span class="badge bg-success">Employer</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Admin</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= new Date(user.created_at).toLocaleDateString() %></td>
+                                        <td>
+                                            <% if (user.is_active) { %>
+                                                <span class="badge bg-success">Active</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Inactive</span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="#" class="btn btn-sm btn-outline-primary">View All Users</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Application Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="applicationChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Recent Jobs</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Company</th>
+                                <th>Type</th>
+                                <th>Posted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (jobs.length === 0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center py-3">No jobs found</td>
+                                </tr>
+                            <% } else { %>
+                                <% jobs.forEach(job => { %>
+                                    <tr>
+                                        <td><%= job.job_id %></td>
+                                        <td><a href="/jobs/<%= job.job_id %>"><%= job.title %></a></td>
+                                        <td><%= job.company_name %></td>
+                                        <td>
+                                            <% if (job.job_type === 'full-time') { %>
+                                                <span class="badge bg-primary">Full-time</span>
+                                            <% } else if (job.job_type === 'part-time') { %>
+                                                <span class="badge bg-info">Part-time</span>
+                                            <% } else if (job.job_type === 'contract') { %>
+                                                <span class="badge bg-warning">Contract</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">Internship</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= new Date(job.posted_date).toLocaleDateString() %></td>
+                                        <td>
+                                            <% if (job.status === 'active') { %>
+                                                <span class="badge bg-success">Active</span>
+                                            <% } else if (job.status === 'closed') { %>
+                                                <span class="badge bg-danger">Closed</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">Draft</span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="/jobs" class="btn btn-sm btn-outline-primary">View All Jobs</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart for application status
+    const applicationStats = "<%- JSON.stringify(applicationStats) %>";
+    
+    if (applicationStats.length > 0) {
+        const statusLabels = applicationStats.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1));
+        const statusCounts = applicationStats.map(item => parseInt(item.count));
+        
+        const ctx = document.getElementById('applicationChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: [
+                        '#17a2b8', // pending
+                        '#6f42c1', // reviewed
+                        '#ffc107', // shortlisted
+                        '#dc3545', // rejected
+                        '#28a745'  // hired
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+<%- include('../partials/footer') %>

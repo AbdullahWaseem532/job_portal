@@ -1,0 +1,219 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/jobs">Jobs</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><%= job.title %></li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<% if (req.query.success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Your application has been submitted successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+<% if (req.query.alreadyApplied) { %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        You have already applied for this job.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-2"><%= job.title %></h2>
+                <p class="text-muted mb-4"><%= job.company_name %> • <%= job.company_location || 'Location not specified' %></p>
+                
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <% if (job.location) { %>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt"></i> <%= job.location %></span>
+                    <% } else if (job.is_remote) { %>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-laptop"></i> Remote</span>
+                    <% } %>
+                    
+                    <span class="badge 
+                        <%= job.job_type === 'full-time' ? 'bg-primary' : 
+                           job.job_type === 'part-time' ? 'bg-info' : 
+                           job.job_type === 'contract' ? 'bg-warning' : 'bg-secondary' %>">
+                        <%= job.job_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                    </span>
+                    
+                    <% if (job.category_name) { %>
+                        <span class="badge bg-light text-dark border"><%= job.category_name %></span>
+                    <% } %>
+                    
+                    <% if (job.salary_min && job.salary_max) { %>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-cash"></i> $<%= job.salary_min.toLocaleString() %> - $<%= job.salary_max.toLocaleString() %></span>
+                    <% } %>
+                    
+                    <span class="badge bg-light text-dark border"><i class="bi bi-calendar"></i> Posted <%= new Date(job.posted_date).toLocaleDateString() %></span>
+                </div>
+                
+                <div class="job-actions mb-4">
+                    <% if (user && user.user_type === 'job_seeker') { %>
+                        <% if (hasApplied) { %>
+                            <button class="btn btn-success" disabled>
+                                <i class="bi bi-check-circle-fill me-1"></i> Applied
+                            </button>
+                        <% } else { %>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                Apply Now
+                            </button>
+                        <% } %>
+                    <% } else if (!user) { %>
+                        <a href="/login" class="btn btn-primary">Login to Apply</a>
+                    <% } %>
+                    <button class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                    <button class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-bookmark"></i> Save
+                    </button>
+                </div>
+                
+                <div class="job-description mb-4">
+                    <h4>Job Description</h4>
+                    <div class="mt-3">
+                        <%= job.description.replace(/\n/g, '<br>') %>
+                    </div>
+                </div>
+                
+                <% if (job.requirements) { %>
+                    <div class="job-requirements mb-4">
+                        <h4>Requirements</h4>
+                        <div class="mt-3">
+                            <%= job.requirements.replace(/\n/g, '<br>') %>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <% if (skills && skills.length > 0) { %>
+                    <div class="job-skills mb-4">
+                        <h4>Skills</h4>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <% skills.forEach(skill => { %>
+                                <span class="badge <%= skill.is_required ? 'bg-primary' : 'bg-light text-dark border' %>">
+                                    <%= skill.skill_name %>
+                                    <% if (skill.is_required) { %>
+                                        <i class="bi bi-star-fill ms-1 small"></i>
+                                    <% } %>
+                                </span>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <% if (job.deadline) { %>
+                    <div class="job-deadline alert alert-warning">
+                        <i class="bi bi-clock me-2"></i> Application Deadline: <%= new Date(job.deadline).toLocaleDateString() %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Company Information</h5>
+            </div>
+            <div class="card-body">
+                <h5><%= job.company_name %></h5>
+                <% if (job.company_location) { %>
+                    <p class="mb-2"><i class="bi bi-geo-alt text-primary me-2"></i> <%= job.company_location %></p>
+                <% } %>
+                <% if (job.website) { %>
+                    <p class="mb-2"><i class="bi bi-globe text-primary me-2"></i> <a href="<%= job.website %>" target="_blank"><%= job.website.replace(/^https?:\/\//, '') %></a></p>
+                <% } %>
+                
+                <% if (job.company_description) { %>
+                    <hr>
+                    <h6>About the Company</h6>
+                    <p class="mb-0"><%= job.company_description.length > 200 ? job.company_description.substring(0, 200) + '...' : job.company_description %></p>
+                <% } %>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Job Summary</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <span>Employment Type:</span>
+                            <span class="fw-bold"><%= job.job_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %></span>
+                        </div>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <span>Location:</span>
+                            <span class="fw-bold"><%= job.location || (job.is_remote ? 'Remote' : 'Not specified') %></span>
+                        </div>
+                    </li>
+                    <% if (job.salary_min && job.salary_max) { %>
+                        <li class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <span>Salary Range:</span>
+                                <span class="fw-bold">$<%= job.salary_min.toLocaleString() %> - $<%= job.salary_max.toLocaleString() %></span>
+                            </div>
+                        </li>
+                    <% } %>
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <span>Posted Date:</span>
+                            <span class="fw-bold"><%= new Date(job.posted_date).toLocaleDateString() %></span>
+                        </div>
+                    </li>
+                    <% if (job.deadline) { %>
+                        <li class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <span>Deadline:</span>
+                                <span class="fw-bold"><%= new Date(job.deadline).toLocaleDateString() %></span>
+                            </div>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<% if (user && user.user_type === 'job_seeker' && !hasApplied) { %>
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applyModalLabel">Apply for <%= job.title %></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/applications/apply/<%= job.job_id %>" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cover_letter" class="form-label">Cover Letter (Optional)</label>
+                            <textarea class="form-control" id="cover_letter" name="cover_letter" rows="6" placeholder="Introduce yourself and explain why you're a good fit for this position..."></textarea>
+                        </div>
+                        <p class="text-muted">Your profile information will be shared with the employer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>

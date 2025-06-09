@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Login</h4>
+            </div>
+            <div class="card-body">
+                <form action="/login" method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="<%= locals.values ? values.email : '' %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_type" class="form-label">Login as</label>
+                        <select class="form-select" id="user_type" name="user_type" required>
+                            <option value="" disabled <%= !locals.values ? 'selected' : '' %>>Select account type</option>
+                            <option value="job_seeker" <%= locals.values && values.user_type === 'job_seeker' ? 'selected' : '' %>>Job Seeker</option>
+                            <option value="employer" <%= locals.values && values.user_type === 'employer' ? 'selected' : '' %>>Employer</option>
+                            <option value="admin" <%= locals.values && values.user_type === 'admin' ? 'selected' : '' %>>Administrator</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="text-center">
+                    <p class="mb-0">Don't have an account?</p>
+                    <div class="mt-2">
+                        <a href="/register" class="btn btn-outline-primary me-2">Register as Job Seeker</a>
+                        <a href="/register-company" class="btn btn-outline-primary">Register as Employer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

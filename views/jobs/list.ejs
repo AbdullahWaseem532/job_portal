@@ -1,0 +1,152 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Browse Jobs</h2>
+        <p class="text-muted">Find the perfect job opportunity for your career.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Filter Jobs</h5>
+            </div>
+            <div class="card-body">
+                <form action="/jobs" method="GET">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="<%= locals.filters && filters.search ? filters.search : '' %>" 
+                               placeholder="Job title or keywords">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All Categories</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category.category_id %>" 
+                                        <%= locals.filters && filters.category == category.category_id ? 'selected' : '' %>>
+                                    <%= category.category_name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="jobType" class="form-label">Job Type</label>
+                        <select class="form-select" id="jobType" name="jobType">
+                            <option value="">All Types</option>
+                            <option value="full-time" <%= locals.filters && filters.jobType === 'full-time' ? 'selected' : '' %>>Full Time</option>
+                            <option value="part-time" <%= locals.filters && filters.jobType === 'part-time' ? 'selected' : '' %>>Part Time</option>
+                            <option value="contract" <%= locals.filters && filters.jobType === 'contract' ? 'selected' : '' %>>Contract</option>
+                            <option value="internship" <%= locals.filters && filters.jobType === 'internship' ? 'selected' : '' %>>Internship</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isRemote" name="isRemote" value="true"
+                                   <%= locals.filters && filters.isRemote === 'true' ? 'checked' : '' %>>
+                            <label class="form-check-label" for="isRemote">
+                                Remote Jobs Only
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                    
+                    <div class="d-grid mt-2">
+                        <a href="/jobs" class="btn btn-outline-secondary">Clear Filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <% if (jobs.length === 0) { %>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">No Jobs Found</h4>
+                    <p class="text-muted">Try adjusting your search filters or check back later.</p>
+                    <a href="/jobs" class="btn btn-outline-primary mt-2">Clear Filters</a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <p class="mb-0"><%= jobs.length %> jobs found</p>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Sort by: Newest
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                        <li><a class="dropdown-item active" href="#">Newest</a></li>
+                        <li><a class="dropdown-item" href="#">Oldest</a></li>
+                        <li><a class="dropdown-item" href="#">Salary: High to Low</a></li>
+                        <li><a class="dropdown-item" href="#">Salary: Low to High</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="job-list">
+                <% jobs.forEach(job => { %>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4 class="card-title mb-1">
+                                        <a href="/jobs/<%= job.job_id %>" class="text-decoration-none text-dark"><%= job.title %></a>
+                                    </h4>
+                                    <p class="text-muted mb-2"><%= job.company_name %></p>
+                                    
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <% if (job.location) { %>
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt"></i> <%= job.location %></span>
+                                        <% } else if (job.is_remote) { %>
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-laptop"></i> Remote</span>
+                                        <% } %>
+                                        
+                                        <span class="badge 
+                                            <%= job.job_type === 'full-time' ? 'bg-primary' : 
+                                               job.job_type === 'part-time' ? 'bg-info' : 
+                                               job.job_type === 'contract' ? 'bg-warning' : 'bg-secondary' %>">
+                                            <%= job.job_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                        </span>
+                                        
+                                        <% if (job.category_name) { %>
+                                            <span class="badge bg-light text-dark border"><%= job.category_name %></span>
+                                        <% } %>
+                                        
+                                        <% if (job.salary_min && job.salary_max) { %>
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-cash"></i> $<%= job.salary_min.toLocaleString() %> - $<%= job.salary_max.toLocaleString() %></span>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <p class="card-text mb-0"><%= job.description.length > 150 ? job.description.substring(0, 150) + '...' : job.description %></p>
+                                </div>
+                                
+                                <div class="col-md-4 text-end d-flex flex-column justify-content-between">
+                                    <div class="text-muted small">
+                                        Posted <%= new Date(job.posted_date).toLocaleDateString() %>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <a href="/jobs/<%= job.job_id %>" class="btn btn-outline-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

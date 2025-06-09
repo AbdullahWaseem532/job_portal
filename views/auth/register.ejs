@@ -1,0 +1,74 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Register as Job Seeker</h4>
+            </div>
+            <div class="card-body">
+                <form action="/register" method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Account Information</h5>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email address*</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<%= locals.values ? values.email : '' %>" required>
+                                <div class="form-text">This will be used to login to your account.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password*</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="form-text">Use at least 8 characters with a mix of letters, numbers & symbols.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password*</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Personal Information</h5>
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name*</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="<%= locals.values ? values.first_name : '' %>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name*</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="<%= locals.values ? values.last_name : '' %>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="<%= locals.values ? values.phone : '' %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" value="<%= locals.values ? values.location : '' %>" placeholder="City, Country">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the Terms of Service and Privacy Policy
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? <a href="/login">Login here</a></p>
+                    <p class="mt-2">Are you an employer? <a href="/register-company">Register as Employer</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

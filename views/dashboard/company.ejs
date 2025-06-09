@@ -1,0 +1,287 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Company Dashboard</h2>
+        <p class="text-muted">Welcome, <%= company.company_name %>! Manage your job listings and applications.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <% if (company.logo_url) { %>
+                        <img src="<%= company.logo_url %>" alt="<%= company.company_name %>" class="img-fluid rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    <% } else { %>
+                        <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                            <%= company.company_name.charAt(0) %>
+                        </div>
+                    <% } %>
+                    <h4><%= company.company_name %></h4>
+                    <% if (company.industry) { %>
+                        <p class="text-muted"><%= company.industry %></p>
+                    <% } %>
+                </div>
+                
+                <ul class="list-group list-group-flush text-start">
+                    <% if (company.location) { %>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="bi bi-geo-alt text-primary me-2"></i> <%= company.location %>
+                        </li>
+                    <% } %>
+                    <% if (company.website) { %>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="bi bi-globe text-primary me-2"></i> 
+                            <a href="<%= company.website %>" target="_blank"><%= company.website.replace(/^https?:\/\//, '') %></a>
+                        </li>
+                    <% } %>
+                    <% if (company.company_size) { %>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="bi bi-people text-primary me-2"></i> <%= company.company_size %> employees
+                        </li>
+                    <% } %>
+                </ul>
+                
+                <div class="d-grid mt-3">
+                    <a href="#" class="btn btn-outline-primary">Edit Company Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 mb-4">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm text-center h-100">
+                    <div class="card-body">
+                        <div class="display-4 text-primary mb-2"><%= jobsCount %></div>
+                        <h5 class="card-title">Active Jobs</h5>
+                        <div class="mt-3">
+                            <a href="/jobs/create/new" class="btn btn-primary">Post a New Job</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm text-center h-100">
+                    <div class="card-body">
+                        <div class="display-4 text-primary mb-2"><%= applicationsCount %></div>
+                        <h5 class="card-title">Total Applications</h5>
+                        <canvas id="applicationChart" width="100%" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Your Job Listings</h5>
+            </div>
+            <div class="card-body p-0">
+                <% if (jobs.length === 0) { %>
+                    <div class="text-center py-5">
+                        <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No Jobs Posted Yet</h5>
+                        <p class="text-muted">Start posting jobs to find the perfect candidates.</p>
+                        <a href="/jobs/create/new" class="btn btn-primary mt-2">Post a New Job</a>
+                    </div>
+                <% } else { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Posted Date</th>
+                                    <th>Applications</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% jobs.forEach(job => { %>
+                                    <tr>
+                                        <td><a href="/jobs/<%= job.job_id %>"><%= job.title %></a></td>
+                                        <td>
+                                            <span class="badge 
+                                                <%= job.job_type === 'full-time' ? 'bg-primary' : 
+                                                  job.job_type === 'part-time' ? 'bg-info' : 
+                                                  job.job_type === 'contract' ? 'bg-warning' : 'bg-secondary' %>">
+                                                <%= job.job_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                            </span>
+                                        </td>
+                                        <td><%= job.location || (job.is_remote ? 'Remote' : 'Not specified') %></td>
+                                        <td><%= new Date(job.posted_date).toLocaleDateString() %></td>
+                                        <td>
+                                            <a href="/applications/job/<%= job.job_id %>" class="badge bg-light text-dark">
+                                                <%= job.application_count || 0 %> <i class="bi bi-people-fill ms-1"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                <%= job.status === 'active' ? 'bg-success' : 
+                                                  job.status === 'closed' ? 'bg-danger' : 'bg-secondary' %>">
+                                                <%= job.status.charAt(0).toUpperCase() + job.status.slice(1) %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="/jobs/<%= job.job_id %>">View</a></li>
+                                                    <li><a class="dropdown-item" href="/applications/job/<%= job.job_id %>">View Applications</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <% if (job.status === 'active') { %>
+                                                            <button class="dropdown-item text-danger" onclick="updateJobStatus('<%= job.job_id %>', 'closed')">Close Job</button>
+                                                        <% } else if (job.status === 'closed') { %>
+                                                            <button class="dropdown-item text-success" onclick="updateJobStatus('<%= job.job_id %>', 'active')">Reactivate Job</button>
+                                                        <% } %>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="/jobs/create/new" class="btn btn-primary">Post a New Job</a>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Recent Applications</h5>
+            </div>
+            <div class="card-body p-0">
+                <% if (applications.length === 0) { %>
+                    <div class="text-center py-5">
+                        <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No Applications Yet</h5>
+                        <p class="text-muted">You'll see applications here once candidates apply to your jobs.</p>
+                    </div>
+                <% } else { %>
+                    <div class="list-group list-group-flush">
+                        <% applications.forEach(application => { %>
+                            <div class="list-group-item p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-1"><%= application.applicant_name %></h5>
+                                        <p class="mb-1">Applied for <a href="/jobs/<%= application.job_id %>"><%= application.job_title %></a></p>
+                                        <small class="text-muted">
+                                            Applied on <%= new Date(application.applied_date).toLocaleDateString() %>
+                                        </small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select form-select-sm application-status" 
+                                                data-application-id="<%= application.application_id %>"
+                                                onchange="updateApplicationStatus('<%= application.application_id %>', this.value)">
+                                            <option value="pending" <%= application.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="reviewed" <%= application.status === 'reviewed' ? 'selected' : '' %>>Reviewed</option>
+                                            <option value="shortlisted" <%= application.status === 'shortlisted' ? 'selected' : '' %>>Shortlisted</option>
+                                            <option value="rejected" <%= application.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                                            <option value="hired" <%= application.status === 'hired' ? 'selected' : '' %>>Hired</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <a href="/applications/job/<%= application.job_id %>" class="btn btn-sm btn-outline-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart for application status
+    const stats = "<%- JSON.stringify(stats) %>";
+    
+    if (stats.length > 0) {
+        const statusLabels = stats.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1));
+        const statusCounts = stats.map(item => parseInt(item.count));
+        
+        const ctx = document.getElementById('applicationChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: [
+                        '#17a2b8', // pending
+                        '#6f42c1', // reviewed
+                        '#ffc107', // shortlisted
+                        '#dc3545', // rejected
+                        '#28a745'  // hired
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Function to update application status
+function updateApplicationStatus(applicationId, status) {
+    fetch(`/applications/status/${applicationId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Success notification
+            alert('Application status updated successfully');
+        } else {
+            // Error notification
+            alert('Error updating application status: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating application status');
+    });
+}
+
+// Function to update job status
+function updateJobStatus(jobId, status) {
+    // Implementation would go here - for demo purposes
+    alert('This would update job ID ' + jobId + ' to status: ' + status);
+}
+</script>
+
+<%- include('../partials/footer') %>
