@@ -1,70 +1,67 @@
+// controllers/companyController.js
 const pool = require('../config/database');
 
-const companyController = {
-  // GET all companies
-  getAllCompanies: async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT c.*, 
-               COUNT(DISTINCT j.job_id) as total_jobs,
-               COUNT(DISTINCT cr.review_id) as review_count,
-               ROUND(AVG(cr.rating), 2) as avg_rating
-        FROM companies c
-        LEFT JOIN jobs j ON c.company_id = j.company_id
-        LEFT JOIN company_reviews cr ON c.company_id = cr.company_id
-        GROUP BY c.company_id
-        ORDER BY c.created_at DESC
-      `);
-      res.json(result.rows);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+// Display company dashboard
+exports.getCompanyDashboard = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    
+    // Get company profile
+    const companyResult = await pool.query(
+      'SELECT * FROM companies WHERE user_id = $1',
+      [userId]
+    );
+    
+    const company = companyResult.rows[0];
+    
+    if (!company) {
+      return res.status(404).render('error', { error: 'Company profile not found' });
     }
-  },
-
-  // GET company by ID
-  getCompanyById: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const result = await pool.query(`
-        SELECT c.*,
-               COUNT(DISTINCT j.job_id) as total_jobs,
-               COUNT(DISTINCT cr.review_id) as review_count,
-               ROUND(AVG(cr.rating), 2) as avg_rating
-        FROM companies c
-        LEFT JOIN jobs j ON c.company_id = j.company_id
-        LEFT JOIN company_reviews cr ON c.company_id = cr.company_id
-        WHERE c.company_id = $1
-        GROUP BY c.company_id
-      `, [id]);
-      
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Company not found' });
-      }
-      res.json(result.rows[0]);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // POST create company
-  createCompany: async (req, res) => {
-    try {
-      const { user_id, company_name, industry, company_size, website, description, location, logo_url } = req.body;
-      
-      const result = await pool.query(
-        `INSERT INTO companies (user_id, company_name, industry, company_size, website, description, location, logo_url) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING company_id`,
-        [user_id, company_name, industry, company_size, website, description, location, logo_url]
-      );
-      
-      res.status(201).json({ 
-        message: 'Company created successfully', 
-        company_id: result.rows[0].company_id 
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+    
+    // Get company's jobs
+    const jobsResult = await pool.query(
+      `SELECT j.*, COUNT(a.application_id) AS application_count 
+       FROM jobs j
+       LEFT JOIN applications a ON j.job_id = a.job_id
+       WHERE j.company_id = $1
+       GROUP BY j.job_id
+       ORDER BY j.posted_date DESC`,
+      [company.company_id]
+    );
+    
+    // Get recent applications for company's jobs
+    const applicationsResult = await pool.query(
+      `SELECT a.*, j.title AS job_title, 
+          CONCAT(up.first_name, ' ', up.last_name) AS applicant_name
+       FROM applications a
+       JOIN jobs j ON a.job_id = j.job_id
+       JOIN user_profiles up ON a.user_id = up.user_id
+       WHERE j.company_id = $1
+       ORDER BY a.applied_date DESC
+       LIMIT 10`,
+      [company.company_id]
+    );
+    
+    // Get application stats by status
+    const statsResult = await pool.query(
+      `SELECT a.status, COUNT(*) as count
+       FROM applications a
+       JOIN jobs j ON a.job_id = j.job_id
+       WHERE j.company_id = $1
+       GROUP BY a.status`,
+      [company.company_id]
+    );
+    
+    res.render('dashboard/company', {
+      company,
+      jobs: jobsResult.rows,
+      applications: applicationsResult.rows,
+      stats: statsResult.rows,
+      jobsCount: jobsResult.rowCount,
+      applicationsCount: applicationsResult.rowCount
+    });
+  } catch (err) {
+    console.error(err);
+    res.render('error', { error: 'Error loading company dashboard' });
   }
 };
-
-module.exports = companyController;

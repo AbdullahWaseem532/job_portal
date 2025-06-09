@@ -1,59 +1,71 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const session = require('express-session');
+const methodOverride = require('method-override');
+const morgan = require('morgan');
 require('dotenv').config();
 
-const userRoutes = require('./routes/users');
-const jobRoutes = require('./routes/jobs');
-const applicationRoutes = require('./routes/applications');
-const reportRoutes = require('./routes/reports');
-const companyRoutes = require('./routes/companies');
-const categoryRoutes = require('./routes/categories');
-const skillRoutes = require('./routes/skills');
-const notificationRoutes = require('./routes/notifications');
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const companyRoutes = require('./routes/companyRoutes');
+const jobRoutes = require('./routes/jobRoutes');
+const applicationRoutes = require('./routes/applicationRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 6006;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+app.use(morgan('dev'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/companies', companyRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/skills', skillRoutes);
-app.use('/api/notifications', notificationRoutes);
+// Set view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ message: 'Job Portal API is running!', timestamp: new Date().toISOString() });
+// Session middleware
+app.use(session({
+  secret: 'jobportalsecret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+}));
+
+// Global middleware to make user available to all templates
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  res.locals.error = null;
+  next();
 });
 
-// Root route
+// Routes
+app.use('/', authRoutes);
+app.use('/users', userRoutes);
+app.use('/companies', companyRoutes);
+app.use('/jobs', jobRoutes);
+app.use('/applications', applicationRoutes);
+
+// Home route
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Welcome to Job Portal API',
-    endpoints: {
-      users: '/api/users',
-      jobs: '/api/jobs',
-      applications: '/api/applications',
-      companies: '/api/companies',
-      categories: '/api/categories',
-      skills: '/api/skills',
-      notifications: '/api/notifications',
-      reports: '/api/reports',
-      dashboard: '/dashboard.html'
-    }
-  });
+  res.render('index');
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error', { error: err.message });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).render('error', { error: 'Page not found' });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Job Portal Server is running on port ${PORT}`);
-  console.log(`📊 Dashboard available at: http://localhost:${PORT}/dashboard.html`);
-  console.log(`🔗 API Health check: http://localhost:${PORT}/api/health`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
