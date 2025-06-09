@@ -1,0 +1,156 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/dashboard/company">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Post a Job</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="card-title mb-0">Post a New Job</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="/jobs/create" method="POST">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Basic Information</h5>
+                            <hr>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="title" class="form-label">Job Title*</label>
+                            <input type="text" class="form-control" id="title" name="title" value="<%= locals.values ? values.title : '' %>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" name="category_id">
+                                <option value="">Select Category</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.category_id %>" 
+                                            <%= locals.values && values.category_id == category.category_id ? 'selected' : '' %>>
+                                        <%= category.category_name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="job_type" class="form-label">Employment Type*</label>
+                            <select class="form-select" id="job_type" name="job_type" required>
+                                <option value="" disabled <%= !locals.values || !values.job_type ? 'selected' : '' %>>Select Employment Type</option>
+                                <option value="full-time" <%= locals.values && values.job_type === 'full-time' ? 'selected' : '' %>>Full Time</option>
+                                <option value="part-time" <%= locals.values && values.job_type === 'part-time' ? 'selected' : '' %>>Part Time</option>
+                                <option value="contract" <%= locals.values && values.job_type === 'contract' ? 'selected' : '' %>>Contract</option>
+                                <option value="internship" <%= locals.values && values.job_type === 'internship' ? 'selected' : '' %>>Internship</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" value="<%= locals.values ? values.location : '' %>" placeholder="City, Country">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="is_remote" name="is_remote" value="true"
+                                      <%= locals.values && values.is_remote === 'true' ? 'checked' : '' %>>
+                                <label class="form-check-label" for="is_remote">
+                                    This is a remote job
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="salary_min" class="form-label">Minimum Salary (USD)</label>
+                            <input type="number" class="form-control" id="salary_min" name="salary_min" value="<%= locals.values ? values.salary_min : '' %>" min="0" step="1000">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="salary_max" class="form-label">Maximum Salary (USD)</label>
+                            <input type="number" class="form-control" id="salary_max" name="salary_max" value="<%= locals.values ? values.salary_max : '' %>" min="0" step="1000">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="deadline" class="form-label">Application Deadline</label>
+                            <input type="date" class="form-control" id="deadline" name="deadline" value="<%= locals.values ? values.deadline : '' %>">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4 mt-4">
+                        <div class="col-12">
+                            <h5>Job Details</h5>
+                            <hr>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="description" class="form-label">Job Description*</label>
+                            <textarea class="form-control" id="description" name="description" rows="6" required><%= locals.values ? values.description : '' %></textarea>
+                            <div class="form-text">Describe the responsibilities, day-to-day activities, and the impact of this role.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="requirements" class="form-label">Requirements</label>
+                            <textarea class="form-control" id="requirements" name="requirements" rows="6"><%= locals.values ? values.requirements : '' %></textarea>
+                            <div class="form-text">List qualifications, experience, education, and any other requirements for this position.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4 mt-4">
+                        <div class="col-12">
+                            <h5>Skills</h5>
+                            <hr>
+                            <div class="form-text mb-3">Select skills that are relevant for this position.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="skills-container d-flex flex-wrap gap-2">
+                                <% skills.forEach(skill => { %>
+                                    <div class="form-check skill-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="skill_<%= skill.skill_id %>" 
+                                               name="skills[]" 
+                                               value="<%= skill.skill_id %>"
+                                               <%= locals.values && values.skills && values.skills.includes(skill.skill_id.toString()) ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="skill_<%= skill.skill_id %>">
+                                            <%= skill.skill_name %>
+                                        </label>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="/dashboard/company" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Post Job</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
